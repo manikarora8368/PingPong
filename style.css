@@ -9,8 +9,8 @@ body {
   height: 20px;
   background-color: #ecf0f1;
   position: fixed;
+  left:calc(50% - 10px);
   top: 20px;
-  left: 52.5%;
   border-radius: 50%;
 }
 
@@ -19,7 +19,7 @@ body {
   width: 200px;
   height: 20px;
   position: fixed;
-  left: 50%;
+  left: calc(50% - 100px);
   border-radius: 25px;
   text-align: center;
   color: white;

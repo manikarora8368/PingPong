@@ -1,103 +1,81 @@
-var ball = document.getElementById('ball');
-var rod1 = document.getElementById('rod1');
-var rod2 = document.getElementById('rod2');
+let ball = document.getElementById('ball');
+let rod1 = document.getElementById('rod1');
+let rod2 = document.getElementById('rod2');
 
-
-const storeName = "PPName";
-const storeScore = "PPMaxScore";
-const rod1Name = "Rod 1";
-const rod2Name = "Rod 2";
-
-
-let score,
-    maxScore,
-    movement,
-    rod,
-    ballSpeedX = 2,
-    ballSpeedY = 2;
-
-let gameOn = false;
+let rod1Score=0,
+    rod2Score=0,
+    pointsToWin=3,
+    ballSpeedX = 4,
+    ballSpeedY = 4,
+    gameOn = false,
+    rodSpeed=10;
 
 let windowWidth = window.innerWidth,
     windowHeight = window.innerHeight;
 
+let keysPressed={};
 
 
-(function () {
-    rod = localStorage.getItem(storeName);
-    maxScore = localStorage.getItem(storeScore);
-    if (rod === null || maxScore === null) {
-        alert("This is the first time you are playing this game. Press ENTER to  START!!!");
-        maxScore = 0;
-        rod = "Rod1";
-    }else {
-        alert(rod + " has maximum score of " + maxScore * 100 + '. Press ENTER to start new game!!!!!!!!!!');
-    }
-
-    resetBoard(rod);
-})();
-
-
-
-function resetBoard(rodName) {
-
-    rod1.style.left = (window.innerWidth - rod1.offsetWidth) / 2 + 'px';
-    rod2.style.left = (window.innerWidth - rod2.offsetWidth) / 2 + 'px';
+function resetBoard() {
+    rod1.style.left = (window.innerWidth -rod1.offsetWidth ) / 2 + 'px';
+    rod2.style.left = (window.innerWidth -rod2.offsetWidth ) / 2 + 'px';
     ball.style.left = (windowWidth - ball.offsetWidth) / 2 + 'px';
-
-
-    // Lossing player gets the ball
-    if (rodName === rod2Name) {
-        ball.style.top = (rod1.offsetTop + rod1.offsetHeight) + 'px';
-        ballSpeedY = 2;
-    } else if (rodName === rod1Name) {
-        ball.style.top = (rod2.offsetTop - rod2.offsetHeight) + 'px';
-        ballSpeedY = -2;
-    }
-
-    score = 0;
+    ball.style.top = (rod1.offsetTop + rod1.offsetHeight) + 'px';
+    rod1Score = 0;
+    rod2Score = 0;
+    ballSpeedX = 4;
+    ballSpeedY = 4;
+    keysPressed={};
     gameOn = false;
-
+    rod1.innerText=`Rod 1 : ${rod1Score} / ${pointsToWin}`;
+    rod2.innerText=`Rod 2 : ${rod2Score} / ${pointsToWin}`;
 }
+resetBoard();
 
 
+window.addEventListener('keydown',e=>{
+keysPressed[e.code]=true;
+});
 
-function storeWin(rod, score) {
-
-    if (score > maxScore) {
-        maxScore = score;
-        localStorage.setItem(storeName, rod);
-        localStorage.setItem(storeScore, maxScore);
-    }
-
-    clearInterval(movement);
-    resetBoard(rod);
-
-    alert(rod + " wins with a score of " + (score * 100) + ". Max score is: " + (maxScore * 100));
-
-}
+window.addEventListener('keyup',e=>{
+keysPressed[e.code]=false;
+});
 
 
-
-window.addEventListener('keypress', function () {
-    let rodSpeed = 20;
-
-    let rodRect = rod1.getBoundingClientRect();
-
-
-    if (event.code === "KeyD" && ((rodRect.x + rodRect.width) < window.innerWidth)) {
-        rod1.style.left = (rodRect.x) + rodSpeed + 'px';
-        rod2.style.left = rod1.style.left;
-    } else if (event.code === "KeyA" && (rodRect.x > 0)) {
-        rod1.style.left = (rodRect.x) - rodSpeed + 'px';
-        rod2.style.left = rod1.style.left;
-    }
-
-
-    if (event.code === "Enter") {
-
+window.addEventListener('keypress', function (e) {
+    if (e.code === "Enter" || e.code==='Space') 
         if (!gameOn) {
-            gameOn = true;
+            gameOn = true;  
+        }   
+});
+
+function setScore(lastPointBy){
+    gameOn=false;
+    ball.style.left = (windowWidth - ball.offsetWidth) / 2 + 'px';
+    rod1.style.left = (window.innerWidth -rod1.offsetWidth ) / 2 + 'px';
+    rod2.style.left = (window.innerWidth -rod2.offsetWidth ) / 2 + 'px';
+    if(lastPointBy==='rod1'){
+        ball.style.top=(rod2.offsetTop-rod2.offsetHeight)+'px';
+        ballSpeedY=-4;
+    }
+    else{
+        ball.style.top = (rod1.offsetTop + rod1.offsetHeight) + 'px';
+        ballSpeedY=4;
+    }
+    rod1.innerText=`Rod 1 : ${rod1Score} / ${pointsToWin}`;
+    rod2.innerText=`Rod 2 : ${rod2Score} / ${pointsToWin}`;
+    if(rod1Score===pointsToWin){
+        alert('Rod 1 Won!');
+        resetBoard();
+    }
+    if(rod2Score===pointsToWin){
+        alert('Rod 2 Won!');
+        resetBoard();
+    }
+}
+
+setInterval(()=>{
+    if(gameOn){
             let ballRect = ball.getBoundingClientRect();
             let ballX = ballRect.x;
             let ballY = ballRect.y;
@@ -107,52 +85,49 @@ window.addEventListener('keypress', function () {
             let rod2Height = rod2.offsetHeight;
             let rod1Width = rod1.offsetWidth;
             let rod2Width = rod2.offsetWidth;
+            let rod1X = rod1.getBoundingClientRect().x;
+            let rod2X = rod2.getBoundingClientRect().x;     
+
+            if(keysPressed['KeyA'])
+                rod1.style.left=Math.max(rod1X-rodSpeed,0)+'px';
+            else if(keysPressed['KeyD'])
+                rod1.style.left=Math.min(rod1X+rodSpeed,windowWidth-rod1.offsetWidth)+'px';
+            if(keysPressed['ArrowLeft'])
+                rod2.style.left=Math.max(0,rod2X-rodSpeed)+'px';
+            else if(keysPressed['ArrowRight'])
+                rod2.style.left=Math.min(rod2X+rodSpeed,windowWidth-rod2.offsetWidth)+'px';
+
+            // Move ball 
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            ball.style.left = ballX + 'px';
+            ball.style.top = ballY + 'px';
 
 
-            movement = setInterval(function () {
-                // Move ball 
-                ballX += ballSpeedX;
-                ballY += ballSpeedY;
+            if ((ballX + ballDia) > windowWidth || ballX < 0) {
+                ballSpeedX = -ballSpeedX; // Reverses the direction
+            }
 
-                rod1X = rod1.getBoundingClientRect().x;
-                rod2X = rod2.getBoundingClientRect().x;
+            // It specifies the center of the ball on the viewport
+            let ballPos = ballX + ballDia / 2;
 
-                ball.style.left = ballX + 'px';
-                ball.style.top = ballY + 'px';
-
-
-                if ((ballX + ballDia) > windowWidth || ballX < 0) {
-                    ballSpeedX = -ballSpeedX; // Reverses the direction
+            // Check for Rod 1
+            if (ballY <= rod1Height) {
+                ballSpeedY = -ballSpeedY; // Reverses the direction
+                if ((ballPos < rod1X) || (ballPos > (rod1X + rod1Width))) {
+                    rod2Score++;
+                    setScore('rod2');
                 }
+            }
 
-                // It specifies the center of the ball on the viewport
-                let ballPos = ballX + ballDia / 2;
-
-                // Check for Rod 1
-                if (ballY <= rod1Height) {
-                    ballSpeedY = -ballSpeedY; // Reverses the direction
-                    score++;
-
-                    // Check if the game ends
-                    if ((ballPos < rod1X) || (ballPos > (rod1X + rod1Width))) {
-                        storeWin(rod2Name, score);
-                    }
+            // Check for Rod 2
+            else if ((ballY + ballDia) >= (windowHeight - rod2Height)) {
+                ballSpeedY = -ballSpeedY; // Reverses the direction
+                if ((ballPos < rod2X) || (ballPos > (rod2X + rod2Width))) {
+                    rod1Score++;
+                    setScore('rod1');
                 }
-
-                // Check for Rod 2
-                else if ((ballY + ballDia) >= (windowHeight - rod2Height)) {
-                    ballSpeedY = -ballSpeedY; // Reverses the direction
-                    score++;
-
-                    // Check if the game ends
-                    if ((ballPos < rod2X) || (ballPos > (rod2X + rod2Width))) {
-                        storeWin(rod1Name, score);
-                    }
-                }
-
-            }, 10);
-
+            }
         }
-    }
-
-});
+},1000/60);
